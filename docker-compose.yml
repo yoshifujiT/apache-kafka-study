@@ -1,0 +1,41 @@
+version: "3"
+services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    ports:
+      - '2181:2181'
+    volumes:
+      - zookeeper_data:/bitnami
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: bitnami/kafka:latest
+    ports:
+      - '9092:9092'
+    volumes:
+      - kafka_data:/bitnami
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    links:
+      - zookeeper
+    depends_on:
+      - zookeeper
+
+  java:
+    image: maven:3.5.4-jdk-8-alpine
+    volumes:
+      - ./java/src/firstapp:/firstapp
+    working_dir: /firstapp
+    links:
+      - zookeeper
+      - kafka
+    command: /bin/bash
+    tty: true
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local
