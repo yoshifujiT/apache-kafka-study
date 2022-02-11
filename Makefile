@@ -3,11 +3,11 @@ up: ## Starts any linked Services.
 	docker-compose up -d
 
 .PHONY: stop
-package: ## Stop any linked Services.
+stop: ## Stop any linked Services.
 	docker-compose stop
 
 .PHONY: down
-package: ## Down any linked Services.
+down: ## Down any linked Services.
 	docker-compose down
 
 ### javaのpackaging
