@@ -1,0 +1,90 @@
+version: "3"
+services:
+  zookeeper-c:
+    container_name: kafka-study-cluster-zookeeper
+    image: bitnami/zookeeper:latest
+    volumes:
+      - zookeeper_c_data:/bitnami/zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - kafka-study-cluster
+
+  kafka-c-0:
+    container_name: kafka-study-cluster-kafka-0
+    image: bitnami/kafka:latest
+    ports:
+      - "9093:9092"
+    volumes:
+      - kafka_c_0_data:/bitnami
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-c:2181
+      - KAFKA_CFG_BROKER_ID=0
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    networks:
+      - kafka-study-cluster
+    depends_on:
+      - zookeeper-c
+
+  kafka-c-1:
+    container_name: kafka-study-cluster-kafka-1
+    image: bitnami/kafka:latest
+    ports:
+      - "9094:9092"
+    volumes:
+      - kafka_c_1_data:/bitnami
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-c:2181
+      - KAFKA_CFG_BROKER_ID=1
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    networks:
+      - kafka-study-cluster
+    depends_on:
+      - zookeeper-c
+
+  kafka-c-2:
+    container_name: kafka-study-cluster-kafka-2
+    image: bitnami/kafka:latest
+    ports:
+      - "9095:9092"
+    volumes:
+      - kafka_c_2_data:/bitnami
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-c:2181
+      - KAFKA_CFG_BROKER_ID=2
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    networks:
+      - kafka-study-cluster
+    depends_on:
+      - zookeeper-c
+
+  java-c:
+    container_name: kafka-study-cluster-java
+    image: maven:3.5.4-jdk-8-alpine
+    volumes:
+      - ./java/src/firstapp:/firstapp
+    working_dir: /firstapp
+    links:
+      - kafka-c-0
+      - kafka-c-1
+      - kafka-c-2
+      - zookeeper-c
+    networks:
+      - kafka-study-cluster
+    command: /bin/bash
+    tty: true
+
+volumes:
+  zookeeper_c_data:
+    driver: local
+  kafka_c_0_data:
+    driver: local
+  kafka_c_1_data:
+    driver: local
+  kafka_c_2_data:
+    driver: local
+
+networks:
+  kafka-study-cluster:
